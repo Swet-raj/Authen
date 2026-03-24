@@ -188,6 +188,7 @@ export const sendResetOtp = async (req,res)=>{
     }
 
     try {
+        const user = await userModel.findOne({email});
 
         if(!user) {
             return res.json({ success: false, message: "User not found"});
@@ -196,7 +197,7 @@ export const sendResetOtp = async (req,res)=>{
         const otp= String(Math.floor(100000 + Math.random() * 900000));
 
         user.resetOtp=otp;
-        user.resetOtpExpiresAt = Date.now() + 15*60*1000
+        user.resetOtpExpiresAt = Date.now() + 15*60*1000;
 
         await user.save();
 
@@ -231,7 +232,7 @@ export const resetPassword = async (req, res)=>{
             return res.json({ success:false, message: 'User not found'})
         }
 
-        if(user.resetOtp === "" || user.restOtp !==otp) {
+        if(user.resetOtp === "" || user.resetOtp !==otp) {
             return res.json({ success:false,message: "Invalid otp"})
         }
 
@@ -242,7 +243,7 @@ export const resetPassword = async (req, res)=>{
         const hashedPassword = await bcrypt.hash(newPassword, 10);
 
         user.password = hashedPassword;
-        user.restOtp = "";
+        user.resetOtp = "";
         user.resetOtpExpiresAt = 0;
 
         await user.save();
